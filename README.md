@@ -22,6 +22,7 @@ Add TenantProof to an existing Supabase application:
 
 ```bash
 npx tenantproof init
+npx tenantproof doctor
 npx tenantproof generate
 npx tenantproof plan
 npx tenantproof verify
@@ -29,6 +30,8 @@ npx tenantproof execute
 ```
 
 `generate` writes `tenantproof.json`, an editable authorization contract inferred from the SQL schema. Inferred `review` values are deliberately unresolved: access intent must come from the application owner, not from heuristics. It will not overwrite a reviewed contract unless explicitly called with `--force`.
+
+`doctor` checks Node, Docker, the Supabase CLI, migrations, contract, and disposable runtime configuration before a local runtime audit.
 
 `plan` compiles the reviewed contract to `tenantproof/adversarial-plan.json`. Each case describes a resource, actor, operation, and expected allow-or-deny outcome. Plan generation stops if any inferred `review` value remains unresolved.
 

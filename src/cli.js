@@ -5,11 +5,13 @@ import { generateContract } from "./contract.js";
 import { writePlan } from "./plan.js";
 import { executeProject, writeRuntimeExample } from "./runtime.js";
 import { writeReport } from "./report.js";
+import { doctorProject } from "./doctor.js";
 
 const HELP = `TenantProof: authorization regression checks for Supabase applications
 
 Usage:
   tenantproof init [--project <path>]
+  tenantproof doctor [--project <path>]
   tenantproof generate [--project <path>] [--force]
   tenantproof plan [--project <path>]
   tenantproof execute [--project <path>] [--json] [--report <file>]
@@ -17,6 +19,7 @@ Usage:
 
 Commands:
   init      Add a starter contract and GitHub Actions workflow
+  doctor    Check local runtime audit prerequisites
   generate  Infer an editable authorization contract from Supabase migrations
   plan      Compile a reviewed contract into adversarial runtime test cases
   execute   Run the adversarial plan against a disposable Supabase stack
@@ -102,6 +105,12 @@ function printExecution(report) {
   console.log(`Result: ${report.summary.passed} passed, ${report.summary.failed} failed, ${report.summary.error} errors, ${report.summary.skipped} skipped.`);
 }
 
+function printDoctor(report) {
+  for (const item of report.checks) {
+    console.log(`${item.status.toUpperCase().padEnd(8)} ${item.code}: ${item.message}`);
+  }
+}
+
 export async function run(args) {
   const { command, options } = parseArgs(args);
   if (["help", "--help", "-h"].includes(command)) {
@@ -110,6 +119,12 @@ export async function run(args) {
   }
   if (command === "init") {
     await init(options.project);
+    return;
+  }
+  if (command === "doctor") {
+    const report = await doctorProject(options.project);
+    printDoctor(report);
+    if (!report.ok) process.exitCode = 1;
     return;
   }
   if (command === "generate") {

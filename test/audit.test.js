@@ -9,6 +9,7 @@ import { buildPlan, writePlan } from "../src/plan.js";
 import { executePlan } from "../src/runtime.js";
 import { writeRuntimeExample } from "../src/runtime.js";
 import { writeReport } from "../src/report.js";
+import { doctorProject } from "../src/doctor.js";
 import { parseMigration } from "../src/sql.js";
 
 const fixture = (name) => path.resolve("test", "fixtures", name);
@@ -209,4 +210,24 @@ test("writeReport exports readable static and runtime Markdown", async () => {
   });
   assert.match(await readFile(staticFile, "utf8"), /Tenant \\| leak/);
   assert.match(await readFile(runtimeFile, "utf8"), /public.notes/);
+});
+
+test("doctorProject reports local audit readiness without shell assumptions", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "tenantproof-"));
+  await mkdir(path.join(root, "supabase", "migrations"), { recursive: true });
+  await mkdir(path.join(root, "tenantproof"), { recursive: true });
+  await writeFile(path.join(root, "tenantproof.json"), "{}");
+  await writeFile(path.join(root, "tenantproof", "runtime.json"), "{}");
+  const execImpl = async (command) => {
+    if (command === "docker") return { stdout: "29.2.1\n" };
+    if (command.endsWith(".tools/supabase-cli")) return { stdout: "2.103.0\n" };
+    throw new Error("missing");
+  };
+  const report = await doctorProject(root, {
+    cwd: root,
+    execImpl,
+    nodeVersion: "24.14.0",
+  });
+  assert.equal(report.ok, true);
+  assert.deepEqual(report.checks.map(({ status }) => status), ["pass", "pass", "pass", "pass", "pass", "pass"]);
 });
