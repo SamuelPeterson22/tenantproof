@@ -97,7 +97,7 @@ function printExecution(report) {
     const suffix = result.status === "skipped" ? result.reason : `expected ${result.expected}, observed ${result.observed}`;
     console.log(`${result.status.toUpperCase().padEnd(8)} ${result.resource} ${result.actor}.${result.operation}: ${suffix}`);
   }
-  console.log(`Result: ${report.summary.passed} passed, ${report.summary.failed} failed, ${report.summary.skipped} skipped.`);
+  console.log(`Result: ${report.summary.passed} passed, ${report.summary.failed} failed, ${report.summary.error} errors, ${report.summary.skipped} skipped.`);
 }
 
 export async function run(args) {

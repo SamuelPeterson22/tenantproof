@@ -1,4 +1,6 @@
 node_modules/
 coverage/
-tenantproof/runtime.json
-
+**/tenantproof/runtime.json
+**/tenantproof/adversarial-plan.json
+.tools/
+test/integration/app/supabase/.temp/

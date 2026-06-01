@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "node --test test/*.test.js",
-    "check": "node ./bin/tenantproof.js verify --project ./test/fixtures/insecure"
+    "check": "node ./bin/tenantproof.js verify --project ./test/fixtures/insecure",
+    "test:integration": "./test/integration/run-local.sh"
   },
   "engines": {
     "node": ">=20"

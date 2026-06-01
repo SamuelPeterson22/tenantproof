@@ -1,0 +1,24 @@
+{
+  "supabaseUrl": "http://127.0.0.1:54321",
+  "anonKeyEnv": "SUPABASE_ANON_KEY",
+  "allowDelete": true,
+  "actors": {
+    "owner": { "tokenEnv": "TENANTPROOF_OWNER_TOKEN" },
+    "sameTenant": { "tokenEnv": "TENANTPROOF_SAME_TENANT_TOKEN" },
+    "otherTenant": { "tokenEnv": "TENANTPROOF_OTHER_TENANT_TOKEN" }
+  },
+  "resources": {
+    "public.invoices": {
+      "table": "invoices",
+      "idColumn": "id",
+      "targetId": "00000000-0000-0000-0000-000000000101",
+      "insertPayload": {
+        "id": "00000000-0000-0000-0000-000000000102",
+        "tenant_id": "00000000-0000-0000-0000-000000000201",
+        "user_id": "00000000-0000-0000-0000-000000000301",
+        "amount": 50
+      },
+      "updatePayload": { "amount": 150 }
+    }
+  }
+}

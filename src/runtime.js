@@ -57,7 +57,10 @@ async function requestFor(testCase, runtime, fixture, env, fetchImpl) {
 }
 
 function observedAccess(operation, response) {
-  if (!response.ok) return "deny";
+  if (!response.ok) {
+    if ([401, 403].includes(response.status)) return "deny";
+    return "error";
+  }
   if (operation === "insert") return "allow";
   return Array.isArray(response.body) && response.body.length > 0 ? "allow" : "deny";
 }
@@ -93,17 +96,18 @@ export async function executePlan(plan, runtime, options = {}) {
     const observed = observedAccess(testCase.operation, response);
     results.push({
       ...testCase,
-      status: observed === testCase.expected ? "passed" : "failed",
+      status: observed === "error" ? "error" : observed === testCase.expected ? "passed" : "failed",
       observed,
       httpStatus: response.status,
     });
   }
 
   return {
-    ok: !results.some(({ status }) => status === "failed"),
+    ok: !results.some(({ status }) => status === "failed" || status === "error"),
     summary: {
       passed: results.filter(({ status }) => status === "passed").length,
       failed: results.filter(({ status }) => status === "failed").length,
+      error: results.filter(({ status }) => status === "error").length,
       skipped: results.filter(({ status }) => status === "skipped").length,
     },
     results,

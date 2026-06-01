@@ -60,3 +60,20 @@ Minimal runtime configuration:
 ## Current Boundary
 
 The runtime executor expects a disposable local Supabase stack, seeded fixture rows, and actor tokens. Automatic local stack provisioning, user creation, and fixture seeding are the next integration boundary.
+
+## Real Local Integration Fixture
+
+The repository includes a disposable Supabase fixture that exercises owner, same-tenant, other-tenant, and anonymous access through the real local REST API:
+
+```bash
+./scripts/install-supabase-cli.sh
+./test/integration/run-local.sh
+```
+
+The runner expects a running Docker daemon. It starts a trimmed disposable Supabase stack, resets the fixture database, and stops the stack after each run. Supabase currently warns that local services bind to `0.0.0.0`, so run audits only on a trusted network.
+
+To prove that the runtime suite catches a regression, inject a temporary cross-tenant read leak and run the same matrix:
+
+```bash
+./test/integration/run-regression-demo.sh
+```

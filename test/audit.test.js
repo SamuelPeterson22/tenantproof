@@ -138,7 +138,7 @@ test("executePlan classifies silent RLS denials and visible rows", async () => {
     fetchImpl,
   });
   assert.equal(report.ok, true);
-  assert.deepEqual(report.summary, { passed: 2, failed: 0, skipped: 0 });
+  assert.deepEqual(report.summary, { passed: 2, failed: 0, error: 0, skipped: 0 });
 });
 
 test("executePlan refuses remote mutation targets by default", async () => {
@@ -146,6 +146,27 @@ test("executePlan refuses remote mutation targets by default", async () => {
     () => executePlan({ cases: [] }, { supabaseUrl: "https://example.supabase.co", anonKeyEnv: "ANON" }),
     /Refusing to execute mutation checks/,
   );
+});
+
+test("executePlan never treats infrastructure failures as authorization denials", async () => {
+  const report = await executePlan(
+    {
+      cases: [{ resource: "public.invoices", actor: "anonymous", operation: "select", expected: "deny" }],
+    },
+    {
+      supabaseUrl: "http://127.0.0.1:54321",
+      anonKeyEnv: "SUPABASE_ANON_KEY",
+      resources: {
+        "public.invoices": { table: "invoices", idColumn: "id", targetId: "invoice-1" },
+      },
+    },
+    {
+      env: { SUPABASE_ANON_KEY: "anon" },
+      fetchImpl: async () => new Response("unavailable", { status: 503 }),
+    },
+  );
+  assert.equal(report.ok, false);
+  assert.deepEqual(report.summary, { passed: 0, failed: 0, error: 1, skipped: 0 });
 });
 
 test("writeRuntimeExample creates fixtures without embedding tokens", async () => {
