@@ -8,6 +8,7 @@ import { generateContract } from "../src/contract.js";
 import { buildPlan, writePlan } from "../src/plan.js";
 import { executePlan } from "../src/runtime.js";
 import { writeRuntimeExample } from "../src/runtime.js";
+import { writeReport } from "../src/report.js";
 import { parseMigration } from "../src/sql.js";
 
 const fixture = (name) => path.resolve("test", "fixtures", name);
@@ -42,6 +43,19 @@ test("audit passes a secure owner-scoped migration", async () => {
   const report = await auditProject(fixture("secure"));
   assert.equal(report.ok, true);
   assert.deepEqual(report.findings, []);
+});
+
+test("audit permits public anon JWTs in client files but flags service-role JWTs", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "tenantproof-"));
+  await mkdir(path.join(root, "src"), { recursive: true });
+  const jwt = (role) => `${Buffer.from('{"alg":"HS256"}').toString("base64url")}.${Buffer.from(JSON.stringify({ role })).toString("base64url")}.signature`;
+  await writeFile(path.join(root, "src", "config.ts"), `export const key = "${jwt("anon")}";`);
+  assert.deepEqual((await auditProject(root)).findings.map(({ code }) => code), ["NO_MIGRATIONS"]);
+  await writeFile(path.join(root, "src", "config.ts"), `export const key = "${jwt("service_role")}";`);
+  assert.deepEqual(
+    (await auditProject(root)).findings.map(({ code }) => code),
+    ["NO_MIGRATIONS", "CLIENT_SERVICE_ROLE_SECRET"],
+  );
 });
 
 test("generateContract infers owner and tenant columns", async () => {
@@ -178,4 +192,21 @@ test("writeRuntimeExample creates fixtures without embedding tokens", async () =
   assert.equal(runtime.resources["public.invoices"].table, "invoices");
   assert.equal(runtime.actors.owner.tokenEnv, "TENANTPROOF_OWNER_TOKEN");
   assert.equal(JSON.stringify(runtime).includes("owner-token"), false);
+});
+
+test("writeReport exports readable static and runtime Markdown", async () => {
+  const root = await mkdtemp(path.join(os.tmpdir(), "tenantproof-"));
+  const staticFile = await writeReport(root, "reports/static.md", "static", {
+    ok: false,
+    migrationFiles: ["001.sql"],
+    summary: { tables: 1, policies: 0, critical: 1, high: 0, warning: 0 },
+    findings: [{ severity: "critical", code: "EXAMPLE", message: "Tenant | leak" }],
+  });
+  const runtimeFile = await writeReport(root, "reports/runtime.md", "runtime", {
+    ok: true,
+    summary: { passed: 1, failed: 0, error: 0, skipped: 0 },
+    results: [{ status: "passed", resource: "public.notes", actor: "owner", operation: "select", expected: "allow", observed: "allow", httpStatus: 200 }],
+  });
+  assert.match(await readFile(staticFile, "utf8"), /Tenant \\| leak/);
+  assert.match(await readFile(runtimeFile, "utf8"), /public.notes/);
 });

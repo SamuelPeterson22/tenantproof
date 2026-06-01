@@ -34,6 +34,13 @@ npx tenantproof execute
 
 `execute` runs those cases through the Supabase REST API. It reads fixture configuration from `tenantproof/runtime.json` and actor tokens from environment variables. The executor refuses remote URLs unless `allowRemote` is explicitly enabled, and it skips destructive delete checks unless `allowDelete` is enabled.
 
+Export Markdown reports for concierge audits or CI artifacts:
+
+```bash
+npx tenantproof verify --report tenantproof/reports/static.md
+npx tenantproof execute --report tenantproof/reports/runtime.md
+```
+
 Minimal runtime configuration:
 
 ```json

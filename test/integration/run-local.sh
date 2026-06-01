@@ -21,6 +21,6 @@ docker info >/dev/null
 "$CLI" db reset --workdir "$APP" --yes
 "$CLI" status --workdir "$APP" -o env > "$STATUS_FILE"
 
-node "$ROOT/bin/tenantproof.js" verify --project "$APP"
+node "$ROOT/bin/tenantproof.js" verify --project "$APP" --report tenantproof/reports/static.md
 node "$ROOT/bin/tenantproof.js" plan --project "$APP"
 node "$ROOT/test/integration/run-e2e.js" "$STATUS_FILE"

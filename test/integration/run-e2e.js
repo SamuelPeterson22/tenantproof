@@ -3,6 +3,7 @@ import path from "node:path";
 import { createHmac } from "node:crypto";
 import { executeProject } from "../../src/runtime.js";
 import { writePlan } from "../../src/plan.js";
+import { writeReport } from "../../src/report.js";
 
 const root = path.resolve("test/integration/app");
 
@@ -50,6 +51,7 @@ const env = {
 };
 
 const report = await executeProject(root, { env });
+await writeReport(root, "tenantproof/reports/runtime.md", "runtime", report);
 for (const result of report.results) {
   const details = result.status === "failed"
     ? ` expected=${result.expected} observed=${result.observed} http=${result.httpStatus}`
@@ -57,4 +59,5 @@ for (const result of report.results) {
   console.log(`${result.status.toUpperCase().padEnd(8)} ${result.resource} ${result.actor}.${result.operation}${details}`);
 }
 console.log(`Result: ${report.summary.passed} passed, ${report.summary.failed} failed, ${report.summary.error} errors, ${report.summary.skipped} skipped.`);
+console.log(`Wrote ${path.join(root, "tenantproof", "reports", "runtime.md")}.`);
 if (!report.ok) process.exitCode = 1;

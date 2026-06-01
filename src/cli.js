@@ -4,6 +4,7 @@ import { auditProject } from "./audit.js";
 import { generateContract } from "./contract.js";
 import { writePlan } from "./plan.js";
 import { executeProject, writeRuntimeExample } from "./runtime.js";
+import { writeReport } from "./report.js";
 
 const HELP = `TenantProof: authorization regression checks for Supabase applications
 
@@ -11,8 +12,8 @@ Usage:
   tenantproof init [--project <path>]
   tenantproof generate [--project <path>] [--force]
   tenantproof plan [--project <path>]
-  tenantproof execute [--project <path>] [--json]
-  tenantproof verify [--project <path>] [--json]
+  tenantproof execute [--project <path>] [--json] [--report <file>]
+  tenantproof verify [--project <path>] [--json] [--report <file>]
 
 Commands:
   init      Add a starter contract and GitHub Actions workflow
@@ -24,10 +25,11 @@ Commands:
 
 function parseArgs(args) {
   const command = args[0] ?? "help";
-  const options = { project: process.cwd(), json: false, force: false };
+  const options = { project: process.cwd(), json: false, force: false, report: null };
   for (let index = 1; index < args.length; index += 1) {
     if (args[index] === "--json") options.json = true;
     else if (args[index] === "--force") options.force = true;
+    else if (args[index] === "--report") options.report = args[++index];
     else if (args[index] === "--project") options.project = args[++index];
     else throw new Error(`Unknown option: ${args[index]}`);
   }
@@ -124,6 +126,7 @@ export async function run(args) {
     const report = await executeProject(options.project);
     if (options.json) console.log(JSON.stringify(report, null, 2));
     else printExecution(report);
+    if (options.report) console.log(`Wrote ${await writeReport(options.project, options.report, "runtime", report)}.`);
     if (!report.ok) process.exitCode = 1;
     return;
   }
@@ -131,6 +134,7 @@ export async function run(args) {
     const report = await auditProject(options.project);
     if (options.json) console.log(JSON.stringify(report, null, 2));
     else printReport(report);
+    if (options.report) console.log(`Wrote ${await writeReport(options.project, options.report, "static", report)}.`);
     if (!report.ok) process.exitCode = 1;
     return;
   }

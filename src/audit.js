@@ -5,8 +5,8 @@ import { isExposedTable, mergeModels, parseMigration } from "./sql.js";
 const SERVICE_ROLE_PATTERNS = [
   /SUPABASE_SERVICE_ROLE_KEY["']?\s*[:=]/i,
   /service_role["']?\s*[:=]/i,
-  /eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.?[a-zA-Z0-9_-]*/i,
 ];
+const JWT_PATTERN = /eyJ[a-zA-Z0-9_-]+\.eyJ[a-zA-Z0-9_-]+\.?[a-zA-Z0-9_-]*/g;
 const CLIENT_PATH_PATTERN = /(?:^|\/)(?:src|app|pages|components|public|client|frontend)(?:\/|$)/;
 
 function finding(severity, code, message, context = {}) {
@@ -47,6 +47,18 @@ export async function loadProject(projectDirectory, migrationsDirectory = "supab
   return { root, migrationFiles, model: mergeModels(models) };
 }
 
+function containsServiceRoleJwt(content) {
+  for (const token of content.match(JWT_PATTERN) ?? []) {
+    try {
+      const payload = JSON.parse(Buffer.from(token.split(".")[1], "base64url").toString("utf8"));
+      if (payload.role === "service_role") return true;
+    } catch {
+      // Ignore strings that merely resemble JWTs.
+    }
+  }
+  return false;
+}
+
 async function auditClientSecrets(root) {
   const findings = [];
   const files = await walk(root);
@@ -54,7 +66,7 @@ async function auditClientSecrets(root) {
     if (!CLIENT_PATH_PATTERN.test(file.replaceAll(path.sep, "/"))) continue;
     if (!/\.(?:js|jsx|ts|tsx|vue|svelte|env|json)$/.test(file)) continue;
     const content = await readFile(path.join(root, file), "utf8");
-    if (SERVICE_ROLE_PATTERNS.some((pattern) => pattern.test(content))) {
+    if (SERVICE_ROLE_PATTERNS.some((pattern) => pattern.test(content)) || containsServiceRoleJwt(content)) {
       findings.push(
         finding("critical", "CLIENT_SERVICE_ROLE_SECRET", `Possible Supabase service-role material in client-facing file: ${file}`, {
           file,
