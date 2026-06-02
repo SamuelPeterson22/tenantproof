@@ -13,11 +13,10 @@
 
 ## npm Setup
 
-- [ ] Create or sign in to an npm account.
+- [x] Create or sign in to an npm account: `samuelpeterson22`.
 - [x] Confirm the unscoped package name `tenantproof` is available. Checked against the npm registry on 2026-06-02.
 - [ ] Enable two-factor authentication on the npm account.
-- [ ] Decide whether the first release should use the unscoped name `tenantproof` or an npm scope such as `@your-org/tenantproof`.
-- [ ] Update `package.json` if a scoped name is selected.
+- [x] Use the available unscoped package name `tenantproof`.
 
 ## Release
 
