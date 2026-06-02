@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="TenantProof checks whether one customer can access another customer's data in Supabase applications.">
+    <title>TenantProof - Supabase authorization regression checks</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+        background: #07120f;
+        color: #e7fff7;
+      }
+      * { box-sizing: border-box; }
+      body { margin: 0; }
+      main { max-width: 920px; margin: 0 auto; padding: 64px 24px 88px; }
+      h1 { max-width: 820px; font-size: clamp(2.7rem, 7vw, 5.6rem); line-height: 0.98; letter-spacing: -0.07em; margin: 18px 0 24px; }
+      h2 { margin-top: 72px; font-size: 2rem; letter-spacing: -0.04em; }
+      p, li { color: #b8d5cc; font-size: 1.08rem; line-height: 1.7; }
+      .eyebrow { color: #66e2b7; font-size: 0.82rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase; }
+      .lead { max-width: 720px; font-size: 1.32rem; }
+      .actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 32px; }
+      .button { display: inline-block; padding: 13px 18px; border-radius: 999px; background: #66e2b7; color: #07120f; font-weight: 800; text-decoration: none; }
+      .button.secondary { border: 1px solid #295b4b; background: transparent; color: #d5f8ed; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-top: 24px; }
+      .card { border: 1px solid #204a3e; border-radius: 18px; padding: 18px; background: #0a1c17; }
+      pre { overflow-x: auto; border: 1px solid #204a3e; border-radius: 18px; padding: 20px; background: #04100d; color: #b6ffe5; }
+      footer { margin-top: 72px; border-top: 1px solid #204a3e; padding-top: 20px; color: #7fa89b; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Supabase authorization regression checks</p>
+      <h1>Your AI-built SaaS may pass a demo and still leak customer data.</h1>
+      <p class="lead">TenantProof checks whether anonymous visitors, other users, or other tenants can read or modify records they should never reach.</p>
+      <div class="actions">
+        <a class="button" href="mailto:replace-with-your-email@example.com?subject=TenantProof%20audit">Request a free audit</a>
+        <a class="button secondary" href="https://github.com/replace-with-your-username/tenantproof">View on GitHub</a>
+      </div>
+
+      <h2>The question that matters</h2>
+      <p>Can Tenant A read, change, or delete Tenant B's records after your latest AI-generated database change?</p>
+
+      <div class="grid">
+        <div class="card"><strong>Static audit</strong><p>Find missing RLS, permissive policies, risky grants, and exposed service-role material.</p></div>
+        <div class="card"><strong>Reviewed contract</strong><p>Turn intended permissions into an explicit allow-or-deny matrix.</p></div>
+        <div class="card"><strong>Real REST checks</strong><p>Probe owner, teammate, other-tenant, and anonymous behavior against a disposable stack.</p></div>
+      </div>
+
+      <h2>Start with the CLI</h2>
+      <pre><code>npx tenantproof init
+npx tenantproof verify
+npx tenantproof plan
+npx tenantproof execute</code></pre>
+
+      <h2>Early access</h2>
+      <p>We are offering a limited number of free audits for Supabase-backed SaaS apps. Use a disposable local or staging project. Never send production credentials.</p>
+
+      <footer>TenantProof is an early-stage audit tool. Treat its findings as supporting evidence, not as a substitute for professional security review.</footer>
+    </main>
+  </body>
+</html>

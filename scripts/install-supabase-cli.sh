@@ -3,7 +3,7 @@ set -eu
 
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 TOOLS="$ROOT/.tools"
-VERSION="2.103.0"
+VERSION="2.104.0"
 ARCH=$(uname -m)
 
 case "$ARCH" in
@@ -35,4 +35,3 @@ tar -xzf "$TMP/$ASSET" -C "$TMP"
 mv "$TMP/supabase" "$TOOLS/supabase-cli"
 chmod +x "$TOOLS/supabase-cli"
 "$TOOLS/supabase-cli" --version
-

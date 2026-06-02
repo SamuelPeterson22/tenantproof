@@ -2,6 +2,16 @@
 
 TenantProof is an early-stage authorization regression checker for Supabase applications built quickly with AI coding tools.
 
+It answers a concrete question: can one customer read or modify another customer's records after a database or authentication change?
+
+## Install
+
+```bash
+npx tenantproof --help
+```
+
+TenantProof requires Node.js 20 or later. It is not affiliated with Supabase.
+
 It currently performs a zero-dependency static audit of SQL migrations and client-facing source files. It catches:
 
 - Exposed `public` or `storage` tables without row-level security
