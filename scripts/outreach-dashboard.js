@@ -31,6 +31,10 @@ async function readTracker() {
   return readFile(trackerFile, "utf8");
 }
 
+function isRecorded(tracker, prospect) {
+  return tracker.includes(`,${prospect.url},commented,`);
+}
+
 async function readBody(request) {
   let body = "";
   for await (const chunk of request) {
@@ -113,12 +117,12 @@ function html() {
 
       async function record(prospect, button, textarea) {
         button.disabled = true;
-        await api("/api/record", {
+        const result = await api("/api/record", {
           method: "POST",
           headers: { "content-type": "application/json" },
           body: JSON.stringify({ id: prospect.id, action: "commented", notes: "Public comment posted after manual review", comment: textarea.value })
         });
-        button.textContent = "Recorded";
+        button.textContent = result.duplicate ? "Already recorded" : "Recorded";
         button.closest(".card").classList.add("done");
         await refreshSummary();
       }
@@ -134,6 +138,13 @@ function html() {
         const data = await api("/api/summary");
         document.querySelector("#queue-count").textContent = data.prospectCount + " reviewed prospects";
         document.querySelector("#tracker-count").textContent = data.trackerEntries + " tracked outreach actions";
+        for (const card of document.querySelectorAll(".card")) {
+          if (!data.recordedIds.includes(card.dataset.id)) continue;
+          card.classList.add("done");
+          const button = card.querySelector(".record");
+          button.disabled = true;
+          button.textContent = "Already recorded";
+        }
       }
 
       async function start() {
@@ -142,6 +153,7 @@ function html() {
         for (const prospect of prospects) {
           const card = document.createElement("article");
           card.className = "card";
+          card.dataset.id = prospect.id;
           card.innerHTML = \`
             <h2>\${prospect.priority}. \${prospect.title}</h2>
             <div class="meta">\${prospect.source} · \${prospect.segment}</div>
@@ -181,7 +193,8 @@ const server = createServer(async (request, response) => {
     if (request.method === "GET" && url.pathname === "/api/summary") {
       const [prospects, tracker] = await Promise.all([readJson(prospectsFile), readTracker()]);
       const trackerEntries = Math.max(0, tracker.trim().split("\n").length - 1);
-      return send(response, 200, JSON.stringify({ prospectCount: prospects.length, trackerEntries }), "application/json");
+      const recordedIds = prospects.filter(prospect => isRecorded(tracker, prospect)).map(prospect => prospect.id);
+      return send(response, 200, JSON.stringify({ prospectCount: prospects.length, trackerEntries, recordedIds }), "application/json");
     }
     if (request.method === "POST" && url.pathname === "/api/record") {
       const body = await readBody(request);
@@ -189,6 +202,10 @@ const server = createServer(async (request, response) => {
       const prospect = prospects.find(item => item.id === body.id);
       if (!prospect) return send(response, 404, "Unknown prospect");
       if (body.action !== "commented") return send(response, 400, "Unsupported action");
+      const tracker = await readTracker();
+      if (isRecorded(tracker, prospect)) {
+        return send(response, 200, JSON.stringify({ ok: true, duplicate: true }), "application/json");
+      }
       await appendFile(trackerFile, `${trackerRow(prospect, body.action, body.notes)}\n`);
       return send(response, 200, JSON.stringify({ ok: true }), "application/json");
     }
