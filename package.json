@@ -32,5 +32,13 @@
     "multi-tenant",
     "cli"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SamuelPeterson22/tenantproof.git"
+  },
+  "bugs": {
+    "url": "https://github.com/SamuelPeterson22/tenantproof/issues"
+  },
+  "homepage": "https://samuelpeterson22.github.io/tenantproof/",
   "license": "MIT"
 }
