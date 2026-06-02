@@ -17,6 +17,7 @@
     "test": "node --test test/*.test.js",
     "test:syntax": "node --check bin/tenantproof.js && node --check src/*.js",
     "check": "node ./bin/tenantproof.js verify --project ./test/fixtures/insecure",
+    "outreach": "node ./scripts/outreach-dashboard.js",
     "test:integration": "./test/integration/run-local.sh",
     "prepublishOnly": "node --test test/*.test.js && node ./bin/tenantproof.js --help"
   },
