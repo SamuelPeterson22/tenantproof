@@ -2,11 +2,11 @@
 
 ## Repository Setup
 
-- [ ] Create a public GitHub repository named `tenantproof`.
-- [ ] Add the local repository as its remote and push `main`.
+- [x] Create a public GitHub repository named `tenantproof`.
+- [x] Add the local repository as its remote and push `main`.
 - [x] Replace the placeholder email and GitHub URL in `public/index.html`.
 - [x] Add `repository`, `homepage`, and `bugs` URLs to `package.json`.
-- [ ] Confirm GitHub Actions CI passes.
+- [x] Confirm GitHub Actions CI passes.
 - [ ] In GitHub repository settings, enable Pages with GitHub Actions as the source.
 - [ ] Add a short-lived granular npm token as the GitHub Actions secret `NPM_TOKEN` for the first publish.
 - [ ] Review the security contact in `SECURITY.md`.
